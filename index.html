@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AWS Networking — Animated Modules</title>
+<style>
+  :root {
+    --bg1:#f8fafc; --bg2:#eef2ff; --card:#ffffff; --border:#e2e8f0;
+    --text:#1e293b; --muted:#64748b; --soft:#475569;
+    --aws:#f59e0b; --aws-deep:#c2410c; --ink:#1e293b;
+    --beginner:#10b981; --inter:#8b5cf6; --adv:#ef4444;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 60%,#fdf4ff 100%);
+    color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:1120px; margin:0 auto; padding:24px 20px 80px; }
+
+  /* header */
+  .header {
+    display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:18px 24px; margin-bottom:22px;
+    box-shadow:0 4px 24px rgba(15,23,42,.05);
+  }
+  .brand { display:flex; gap:12px; align-items:center; }
+  .logo {
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff;
+    display:grid; place-items:center; font-size:20px; font-weight:800;
+    box-shadow:0 4px 12px rgba(245,158,11,.35);
+  }
+  .htitle { font-size:19px; font-weight:800; letter-spacing:-.02em; }
+  .htitle span { color:var(--aws-deep); }
+  .hsub { font-size:12.5px; color:var(--muted); }
+  .pwrap { display:flex; align-items:center; gap:12px; }
+  .pbar { width:170px; height:9px; background:#f1f5f9; border-radius:99px; overflow:hidden; }
+  .pfill { height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,#f59e0b,#f97316); transition:width .5s cubic-bezier(.4,0,.2,1); }
+  .ptxt { font-size:12.5px; font-weight:600; color:var(--soft); min-width:64px; text-align:right; }
+
+  /* layout */
+  .layout { display:flex; gap:22px; align-items:flex-start; }
+  nav {
+    width:264px; flex-shrink:0; position:sticky; top:24px; display:none;
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:14px; box-shadow:0 4px 24px rgba(15,23,42,.05);
+  }
+  @media(min-width:880px){ nav{display:block} }
+  .ntitle { font-size:11px; font-weight:800; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; padding:6px 10px 10px; }
+  .nbtn {
+    display:flex; width:100%; align-items:center; gap:10px; border:0; background:transparent;
+    color:var(--soft); padding:9px 10px; border-radius:12px; font-size:12.5px; text-align:left;
+    cursor:pointer; font-weight:500; line-height:1.25; transition:background .15s, color .15s; font-family:inherit;
+  }
+  .nbtn:hover { background:#f8fafc; }
+  .nbtn.active { background:#fff7ed; color:var(--aws-deep); font-weight:700; }
+  .nnum {
+    display:grid; place-items:center; width:22px; height:22px; border-radius:50%;
+    background:#f1f5f9; color:var(--muted); font-size:10px; font-weight:800; flex-shrink:0; transition:.2s;
+  }
+  .nbtn.done .nnum { background:var(--beginner); color:#fff; }
+  .nbtn.active .nnum { background:var(--aws); color:#fff; }
+  .nbtn.active.done .nnum { background:var(--beginner); }
+
+  /* main card */
+  main { flex:1; min-width:0; }
+  .card {
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:26px 28px 28px; box-shadow:0 4px 24px rgba(15,23,42,.05);
+  }
+  .panel { animation:in .35s ease; }
+  @keyframes in { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
+  .meta { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .badge {
+    display:inline-block; border-radius:99px; padding:4px 12px; font-size:10.5px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.06em; color:#fff; margin-right:8px;
+  }
+  .mtxt { font-size:12.5px; color:var(--muted); font-weight:500; }
+  .donebtn {
+    border-radius:99px; padding:7px 16px; font-size:12.5px; font-weight:700; cursor:pointer;
+    background:#fff; border:1.5px solid var(--border); color:var(--soft); transition:.2s; font-family:inherit;
+  }
+  .donebtn:hover { border-color:var(--beginner); color:var(--beginner); }
+  .donebtn.on { background:var(--beginner); border-color:var(--beginner); color:#fff; }
+  h2 { font-size:24px; font-weight:800; letter-spacing:-.02em; margin:14px 0 16px; }
+
+  /* diagram */
+  .visbox {
+    background:linear-gradient(160deg,#1e293b,#0f172a); border-radius:16px; padding:14px;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.25);
+  }
+  .visbox svg { width:100%; max-width:640px; display:block; margin:0 auto; height:auto; }
+
+  /* explanation */
+  .explain { margin-top:20px; }
+  .explain p { font-size:14.5px; color:var(--soft); margin-bottom:14px; line-height:1.65; }
+  .kp { display:flex; gap:9px; font-size:13.5px; color:var(--soft); margin-bottom:9px; line-height:1.55; }
+  .kp::before { content:"▸"; color:var(--aws); font-weight:800; }
+  .kp b { color:var(--text); }
+  .gotcha {
+    margin-top:14px; border:1px solid #fde68a; border-left:4px solid var(--aws);
+    background:#fffbeb; border-radius:0 12px 12px 0; padding:13px 16px;
+    font-size:13.5px; color:#78350f; line-height:1.55;
+  }
+  .gotcha b { color:#b45309; }
+  code {
+    background:#f1f5f9; border:1px solid #e2e8f0; padding:1px 6px; border-radius:6px;
+    font-size:12px; color:#0369a1; font-family:ui-monospace,Menlo,Consolas,monospace;
+  }
+
+  /* nav row */
+  .navrow { display:flex; align-items:center; justify-content:space-between; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+  .navbtn {
+    border-radius:12px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; border:0;
+    transition:.2s; font-family:inherit;
+  }
+  .back { background:#f1f5f9; color:var(--text); }
+  .back:hover:not(:disabled) { background:#e2e8f0; }
+  .next { background:linear-gradient(135deg,#f59e0b,#f97316); color:#fff; box-shadow:0 4px 12px rgba(245,158,11,.3); }
+  .next:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(245,158,11,.4); }
+  .navbtn:disabled { opacity:.3; cursor:default; }
+  .step { font-size:12px; color:var(--muted); font-weight:600; }
+  .hint { text-align:center; font-size:11.5px; color:var(--muted); margin-top:14px; }
+  footer { text-align:center; font-size:12px; color:var(--muted); margin-top:26px; }
+
+  /* SVG animations */
+  .flow { stroke-dasharray:6 5; animation:flow 1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset:-22; } }
+  .pulse { animation:pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">
+      <div class="logo">AWS</div>
+      <div>
+        <div class="htitle"><span>AWS</span> Networking — Animated Modules</div>
+        <div class="hsub">Beginner → advanced, one concept at a time</div>
+      </div>
+    </div>
+    <div class="pwrap">
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <span class="ptxt" id="ptxt">0% done</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav id="nav"></nav>
+    <main id="main"></main>
+  </div>
+  <footer>Built as a single self-contained HTML file · no dependencies · works offline</footer>
+</div>
+
+<script>
+/* ---------------- SVG helpers ---------------- */
+const C = { aws:"#fbbf24", blue:"#60a5fa", green:"#4ade80", red:"#f87171", purple:"#c084fc",
+            teal:"#2dd4bf", gray:"#94a3b8", dark:"#0f172a" };
+
+function label(x,y,t,col="#e2e8f0",size=11,anchor="middle"){
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${col}" font-size="${size}" font-weight="600">${t}</text>`;
+}
+function box(x,y,w,h,fill,stroke,t,sub){
+  const dy = sub ? -4 : 4;
+  let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+  s += `<text x="${x+w/2}" y="${y+h/2+dy}" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">${t}</text>`;
+  if(sub) s += `<text x="${x+w/2}" y="${y+h/2+11}" text-anchor="middle" fill="#fff" font-size="9" opacity=".75">${sub}</text>`;
+  return s;
+}
+function pulseRect(x,y,w,h,fill,delay=0,r=4){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" class="pulse" style="animation-delay:${delay}s"/>`;
+}
+function dash(d,color="#94a3b8",w=2){
+  return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" class="flow"/>`;
+}
+function packet(d,color=C.green,dur=2.4,delay=0,r=5){
+  return `<circle r="${r}" fill="${color}" opacity="0">
+    <animateMotion dur="${dur}s" repeatCount="indefinite" begin="${delay}s" path="${d}"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="${dur}s" begin="${delay}s" repeatCount="indefinite"/>
+  </circle>`;
+}
+/* a step chip that fades in/out on a loop (rect + text wrapped in <g> so the label is always visible with the box) */
+function step(x,y,w,h,fill,text,begin,dur=4.2){
+  return `<g opacity="0">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${fill}"/>
+    <text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">${text}</text>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>
+  </g>`;
+}
+function frame(inner){
+  return `<svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="460" height="260" rx="12" fill="none"/>${inner}</svg>`;
+}
+
+/* ---------------- Module visuals ---------------- */
+
+const visRegions = () => frame(`
+  ${label(230,22,"The AWS Global Infrastructure",C.aws,13)}
+  ${box(30,45,180,60,"#1e293b",C.aws,"Region · us-east-1","a separate geographic area")}
+  ${box(55,125,110,100,"#1e293b",C.blue,"Availability Zones","")}
+  ${pulseRect(70,140,80,20,C.blue,0)}${label(110,154,"AZ-a")}
+  ${pulseRect(70,166,80,20,C.blue,0.5)}${label(110,180,"AZ-b")}
+  ${pulseRect(70,192,80,20,C.blue,1)}${label(110,206,"AZ-c")}
+  ${box(250,45,180,60,"#1e293b",C.aws,"Region · ap-south-1","isolated &amp; independent")}
+  ${box(275,125,110,100,"#1e293b",C.purple,"","")}
+  ${label(330,142,"Availability Zones",C.purple,10)}
+  ${pulseRect(290,155,80,20,C.purple,0.3)}${label(330,169,"AZ-a")}
+  ${pulseRect(290,181,80,20,C.purple,0.8)}${label(330,195,"AZ-b")}
+  ${dash("M115 75 Q230 5 345 75",C.gray)}
+  ${packet("M115 75 Q230 5 345 75",C.gray,3,0,4)}
+  ${label(230,40,"high-speed AWS backbone (not the public internet)",C.gray,9)}
+  ${label(110,244,"Each AZ = 1+ discrete data centers",C.gray,9)}
+  ${label(330,244,"with independent power, cooling, networking",C.gray,9)}
+`);
+
+const visVPC = () => frame(`
+  ${label(230,22,"Virtual Private Cloud — your private slice of AWS",C.aws,13)}
+  <rect x="40" y="40" width="380" height="190" rx="12" fill="none" stroke="${C.green}" stroke-width="2" class="pulse"/>
+  ${label(230,62,"VPC · 10.0.0.0/16  (region-scoped)",C.green,13)}
+  ${box(80,80,140,60,"#1e293b",C.blue,"10.0.1.0/24","AZ-a subnet")}
+  ${box(270,80,140,60,"#1e293b",C.blue,"10.0.2.0/24","AZ-b subnet")}
+  ${pulseRect(95,125,45,22,C.blue,0)}${pulseRect(150,125,45,22,C.blue,0.4)}
+  ${pulseRect(285,125,45,22,C.blue,0.8)}${pulseRect(340,125,45,22,C.blue,1.2)}
+  ${label(150,140,"instances","#cbd5e1",9)}${label(340,140,"instances","#cbd5e1",9)}
+  ${label(230,180,"Logically isolated from every other customer's VPC",C.gray,10)}
+  ${label(230,198,"Spans ALL Availability Zones in one region",C.gray,10)}
+  ${label(230,222,"Default VPC: 172.31.0.0/16, all subnets public",C.aws,11)}
+`);
+
+const visSubnets = () => frame(`
+  ${label(230,22,"Subnets — public vs private",C.aws,13)}
+  <rect x="30" y="40" width="400" height="185" rx="12" fill="none" stroke="${C.green}" stroke-width="1.5"/>
+  ${label(230,62,"VPC 10.0.0.0/16",C.green,12)}
+  ${box(55,75,160,130,"#1e293b",C.teal,"Public subnet","10.0.1.0/24 · AZ-a")}
+  ${box(95,115,80,40,C.teal,"#0f172a","Web EC2","has public IP")}
+  ${label(135,192,"Route: 0.0.0.0/0 → IGW",C.teal,10)}
+  ${box(245,75,160,130,"#1e293b",C.blue,"Private subnet","10.0.2.0/24 · AZ-b")}
+  ${box(285,115,80,40,C.blue,"#0f172a","DB EC2","no public IP")}
+  ${label(325,192,"No route to IGW",C.blue,10)}
+  ${dash("M175 135 L285 135",C.green)}
+  ${packet("M175 135 L285 135",C.green,2)}
+  ${label(230,128,"private traffic stays inside VPC",C.green,9)}
+  <circle r="5" fill="${C.red}"><animate attributeName="cx" values="30;415;415;30" dur="7s" repeatCount="indefinite"/><animate attributeName="cy" values="90;25;90;90" dur="7s" repeatCount="indefinite"/></circle>
+  ${label(230,245,'"Public" is not about the subnet itself — it is about the route table',C.gray,10)}
+`);
+
+const visRouteTable = () => frame(`
+  ${label(230,22,"Route Tables — the VPC's GPS",C.aws,13)}
+  ${box(40,60,180,140,"#1e293b",C.blue,"Main route table","applies to subnets with no explicit table")}
+  ${pulseRect(55,100,150,30,"#0f172a",0,5)}${label(130,120,"10.0.0.0/16  →  local",C.green,11)}
+  ${pulseRect(55,140,150,30,"#0f172a",0.5,5)}${label(130,160,"0.0.0.0/0  →  IGW",C.teal,11)}
+  ${dash("M230 130 L250 130",C.gray,1.5)}
+  ${step(250,70,170,30,C.purple,"packet: dst 8.8.8.8",0)}
+  ${step(250,115,170,30,C.gray,"longest prefix match?",1)}
+  ${step(250,160,170,30,C.green,"→ forward to IGW ✓",2)}
+  ${label(230,242,"Every subnet has exactly one route table; every VPC has a 'local' route",C.gray,10)}
+`);
+
+const visIGW = () => frame(`
+  ${label(230,22,"Internet Gateway — the VPC's door to the internet",C.aws,13)}
+  <g><circle cx="55" cy="55" r="22" fill="none" stroke="${C.gray}" stroke-width="2"/>
+     <ellipse cx="55" cy="55" rx="22" ry="8" fill="none" stroke="${C.gray}" stroke-width="1.5"/>
+     <ellipse cx="55" cy="55" rx="8" ry="22" fill="none" stroke="${C.gray}" stroke-width="1.5"/>
+     <animateTransform attributeName="transform" type="translate" values="0 0;0 3;0 0" dur="2.5s" repeatCount="indefinite"/></g>
+  ${label(55,95,"Internet",C.gray,11)}
+  <rect x="150" y="40" width="40" height="30" rx="6" fill="${C.red}" class="pulse"/>
+  ${label(170,88,"IGW",C.red,10)}
+  <rect x="220" y="35" width="210" height="185" rx="12" fill="none" stroke="${C.green}" stroke-width="1.5"/>
+  ${label(325,57,"VPC",C.green,12)}
+  ${box(250,70,150,50,"#1e293b",C.teal,"Public subnet","route 0.0.0.0/0 → IGW")}
+  ${box(275,135,100,40,C.teal,"#0f172a","Web EC2","")}
+  ${dash("M55 55 L150 55")}${dash("M190 55 L325 55 L325 70",C.teal)}
+  ${packet("M55 55 L150 55 L190 55 L220 55 L325 55 L325 70",C.teal,2)}
+  ${packet("M325 70 L325 55 L220 55 L190 55 L150 55 L55 55",C.green,2,1)}
+  ${label(230,242,"Horizontally scaled, redundant, managed by AWS. One IGW per VPC. Free.",C.gray,10)}
+`);
+
+const visNAT = () => frame(`
+  ${label(230,22,"NAT Gateway — outbound-only internet for private subnets",C.aws,13)}
+  <circle cx="230" cy="55" r="20" fill="none" stroke="${C.gray}" stroke-width="2"/>
+  ${label(230,95,"Internet",C.gray,11)}
+  ${dash("M210 55 L160 55 L160 130")}${packet("M210 55 L160 55 L160 130",C.gray,1.6)}
+  <rect x="220" y="35" width="210" height="185" rx="12" fill="none" stroke="${C.green}" stroke-width="1.5"/>
+  ${label(325,57,"VPC",C.green,12)}
+  ${box(130,130,100,36,C.red,"#0f172a","NAT GW","in PUBLIC subnet")}
+  ${box(250,130,150,60,"#1e293b",C.blue,"Private subnet","10.0.2.0/24")}
+  ${box(280,175,90,35,C.blue,"#0f172a","App EC2","")}
+  ${dash("M275 160 L230 160 L160 148",C.blue)}
+  ${packet("M320 175 L320 160 L275 160 L230 160 L160 148",C.blue,2)}
+  ${step(230,122,0,0,"","","0")}
+  <g opacity="0">
+    <text x="230" y="122" text-anchor="middle" fill="${C.red}" font-size="10" font-weight="600">rewrites src IP → NAT's public IP</text>
+    <animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+  </g>
+  <g opacity="0">
+    <text x="230" y="238" text-anchor="middle" fill="${C.red}" font-size="10" font-weight="600">✗ return traffic CANNOT be initiated inbound</text>
+    <animate attributeName="opacity" values="0;1;0" dur="2.4s" begin="2s" repeatCount="indefinite"/>
+  </g>
+`);
+
+const visSG = () => frame(`
+  ${label(230,22,"Security Group — stateful instance firewall",C.aws,13)}
+  <rect x="140" y="50" width="180" height="160" rx="16" fill="none" stroke="${C.green}" stroke-width="2.5" class="pulse"/>
+  ${box(160,70,140,120,"#1e293b",C.green,"EC2 instance","")}
+  ${label(230,45,"Security Group (virtual firewall)",C.green,10)}
+  <g><rect x="0" y="80" width="90" height="26" rx="13" fill="${C.green}"/><text x="45" y="97" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="800">port 443 ✓</text>
+     <animateTransform attributeName="transform" type="translate" values="0 0;110 0;110 0;110 0" dur="2s" repeatCount="indefinite"/>
+     <animate attributeName="opacity" values="0;1;1;0" dur="2s" repeatCount="indefinite"/></g>
+  <g><rect x="0" y="130" width="90" height="26" rx="13" fill="${C.red}"/><text x="45" y="147" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="800">port 22 ✗</text>
+     <animateTransform attributeName="transform" type="translate" values="0 0;90 0;90 0;90 0" dur="2s" begin="1s" repeatCount="indefinite"/>
+     <animate attributeName="opacity" values="0;1;1;0" dur="2s" begin="1s" repeatCount="indefinite"/></g>
+  ${label(60,70,"Internet →",C.gray,10)}
+  <g><rect x="0" y="210" width="160" height="24" rx="12" fill="${C.blue}"/><text x="80" y="226" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="800">response auto-allowed ↩ (stateful)</text>
+     <animateTransform attributeName="transform" type="translate" values="0 0;60 0" dur="1.6s" begin="0.6s" repeatCount="indefinite"/>
+     <animate attributeName="opacity" values="0;1;0" dur="1.6s" begin="0.6s" repeatCount="indefinite"/></g>
+  ${label(230,250,"Default: deny all inbound, allow all outbound",C.gray,10)}
+`);
+
+const visNACL = () => frame(`
+  ${label(230,22,"Network ACL — stateless subnet firewall",C.aws,13)}
+  <rect x="60" y="45" width="340" height="180" rx="14" fill="none" stroke="${C.purple}" stroke-width="3" stroke-dasharray="10 6"/>
+  ${label(230,38,"NACL guards the subnet border",C.purple,10)}
+  ${box(90,90,120,90,"#1e293b",C.blue,"Subnet","10.0.1.0/24")}
+  ${box(110,120,80,35,C.blue,"#0f172a","EC2 A","")}
+  ${box(250,90,120,90,"#1e293b",C.blue,"Subnet","10.0.2.0/24")}
+  ${box(270,120,80,35,C.blue,"#0f172a","EC2 B","")}
+  <rect x="330" y="195" width="110" height="18" rx="4" fill="${C.green}" class="pulse"/><text x="385" y="208" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800">#100 ALLOW 443</text>
+  <rect x="330" y="217" width="110" height="18" rx="4" fill="${C.red}" class="pulse" style="animation-delay:.6s"/><text x="385" y="230" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800">#200 DENY  23</text>
+  <rect x="330" y="239" width="110" height="18" rx="4" fill="${C.gray}" class="pulse" style="animation-delay:1.2s"/><text x="385" y="252" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800">*    DENY  ALL</text>
+  ${label(230,190,"evaluated in rule-number order · stateless: return traffic needs its own rule",C.purple,10)}
+`);
+
+const visPeering = () => frame(`
+  ${label(230,22,"VPC Peering — 1-to-1 private connection",C.aws,13)}
+  ${box(30,60,170,130,"#1e293b",C.green,"VPC A  10.0.0.0/16","app")}
+  ${box(70,120,90,45,C.green,"#0f172a","EC2","10.0.1.5")}
+  ${box(260,60,170,130,"#1e293b",C.purple,"VPC B  172.16.0.0/16","data")}
+  ${box(300,120,90,45,C.purple,"#0f172a","RDS","172.16.1.8")}
+  ${dash("M200 125 L260 125",C.aws,3)}
+  ${packet("M115 120 Q230 90 345 120",C.green,2)}
+  ${packet("M345 120 Q230 90 115 120",C.purple,2,1)}
+  ${label(230,105,"peering connection (non-transitive)",C.aws,10)}
+  ${box(145,205,70,40,"#0f172a",C.gray,"VPC C","no path ✗")}
+  ${dash("M180 205 Q230 160 280 190",C.red)}
+  ${label(230,252,"A↔B and B↔C does NOT give A↔C — peering does not transit",C.red,10)}
+`);
+
+const visTGW = () => {
+  const spokes = [
+    {x:40,y:50,c:C.green,n:"VPC A"},{x:320,y:50,c:C.purple,n:"VPC B"},
+    {x:40,y:190,c:C.blue,n:"VPC C"},{x:320,y:190,c:C.teal,n:"VPC D"}
+  ];
+  let s = label(230,22,"Transit Gateway — hub-and-spoke for many VPCs",C.aws,13);
+  s += `<g class="pulse"><circle cx="230" cy="130" r="38" fill="${C.aws}"/><text x="230" y="128" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="800">TGW</text><text x="230" y="144" text-anchor="middle" fill="#78350f" font-size="8" font-weight="700">any-to-any routing</text></g>`;
+  spokes.forEach((sp,i)=>{
+    s += dash(`M${sp.x+55} ${sp.y+25} Q230 130 230 130`,sp.c,1.5);
+    s += box(sp.x,sp.y,110,50,"#1e293b",sp.c,sp.n,"spoke");
+    s += packet(`M${sp.x+55} ${sp.y+25} Q230 130 230 130`,sp.c,2+i*0.4,i*0.3,3.5);
+    s += packet(`M230 230 Q230 130 ${sp.x+55} ${sp.y+25}`,sp.c,2+i*0.4,1+i*0.3,3.5);
+  });
+  s += label(230,252,"One attachment per VPC → talk to ALL others. Also links VPN &amp; Direct Connect.",C.gray,10);
+  return frame(s);
+};
+
+const visHybrid = () => frame(`
+  ${label(230,22,"Hybrid connectivity — your datacenter ↔ AWS",C.aws,13)}
+  ${box(20,100,110,70,"#1e293b",C.gray,"On-prem","your datacenter")}
+  <rect x="180" y="40" width="260" height="190" rx="12" fill="none" stroke="${C.green}" stroke-width="1.5"/>
+  ${label(310,62,"AWS Cloud",C.green,12)}
+  ${dash("M130 118 Q180 118 250 118",C.purple)}
+  ${packet("M130 118 Q180 118 250 118",C.purple,2)}
+  ${box(250,100,100,36,C.purple,"#0f172a","VGW / TGW","IPsec VPN")}
+  ${label(178,100,"VPN — encrypted over public internet",C.purple,9)}
+  ${dash("M130 150 Q180 200 250 200",C.teal,3)}
+  ${packet("M130 150 Q180 200 250 200",C.teal,2.4)}
+  ${box(250,182,100,36,C.teal,"#0f172a","Direct Connect","private fiber")}
+  ${label(185,170,"DX — dedicated physical circuit, low latency",C.teal,9)}
+  ${label(230,250,"DX is faster &amp; more consistent; VPN is quicker to set up. Many orgs use both.",C.gray,10)}
+`);
+
+const visDNS = () => {
+  const steps = [
+    {t:"1. api.myapp.com?",x:120,y:45,c:C.blue,d:0},
+    {t:"2. Route 53 answers 54.x.x.x",x:150,y:90,c:C.aws,d:1.2},
+    {t:"3. traffic → ALB → targets",x:190,y:135,c:C.green,d:2.4}
+  ];
+  let s = label(230,22,"Route 53 &amp; VPC DNS — names to addresses",C.aws,13);
+  s += `<circle cx="50" cy="55" r="16" fill="${C.blue}"/>` + label(50,92,"user",C.blue,10);
+  steps.forEach(st=>{
+    s += `<g opacity="0"><rect x="${st.x}" y="${st.y}" width="190" height="26" rx="13" fill="${st.c}"/>
+      <text x="${st.x+95}" y="${st.y+17}" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="800">${st.t}</text>
+      <animate attributeName="opacity" values="0;1;1;0" dur="4.2s" begin="${st.d}s" repeatCount="indefinite"/></g>`;
+  });
+  s += box(355,45,90,45,C.aws,"#0f172a","Route 53","managed DNS");
+  s += box(330,130,110,45,C.green,"#0f172a","Load Balancer","in your VPC");
+  s += pulseRect(30,200,130,24,"#334155",0,12)+`<text x="95" y="216" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="600">A / AAAA</text>`;
+  s += pulseRect(170,200,130,24,"#334155",0.4,12)+`<text x="235" y="216" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="600">CNAME</text>`;
+  s += pulseRect(310,200,130,24,"#334155",0.8,12)+`<text x="375" y="216" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="600">Alias (free, AWS-aware)</text>`;
+  s += label(230,250,"VPC DNS (the .2 address, e.g. 10.0.0.2) resolves instance names inside the VPC",C.gray,10);
+  return frame(s);
+};
+
+/* ---------------- Module content ---------------- */
+
+const MODULES = [
+ {id:"regions",title:"Regions & Availability Zones",level:"Beginner",color:"#10b981",vis:visRegions,
+  body:`<p>Everything in AWS networking starts physically. A <b>Region</b> is a geographic area (e.g. <code>ap-south-1</code> Mumbai), and inside each region are isolated <b>Availability Zones (AZs)</b> — clusters of one or more data centers with independent power, cooling and networking, connected by redundant high-speed fiber.</p>
+  <div class="kp"><span>You choose a region for latency, compliance/data residency, cost, and service availability.</span></div>
+  <div class="kp"><span>AZs give you resilience: spread instances across 2–3 AZs so one data-center failure doesn't take you down.</span></div>
+  <div class="kp"><span>AWS's global backbone links regions and AZs privately — faster and safer than the public internet.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> AZ names like <code>use1-az1</code> are <i>account-specific mappings</i>. Your "az1" may be a different physical data center than another account's "az1" — never assume AZ names line up across accounts.</div>`},
+ {id:"vpc",title:"VPC — Virtual Private Cloud",level:"Beginner",color:"#10b981",vis:visVPC,
+  body:`<p>A <b>VPC</b> is your own logically isolated network inside one AWS region. You define a private IP range (CIDR block, e.g. <code>10.0.0.0/16</code>) and everything you launch — EC2, RDS, load balancers — lives inside it.</p>
+  <div class="kp"><span><b>Regional resource:</b> a VPC spans all AZs in its region; you never "launch a VPC in an AZ".</span></div>
+  <div class="kp"><span><b>Isolation is logical:</b> your VPC is completely isolated from other customers' VPCs on the same hardware.</span></div>
+  <div class="kp"><span>Every account gets a <b>default VPC</b> (172.31.0.0/16) where every subnet is public — great for testing, bad for production habits.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotchas:</b> CIDR blocks can't overlap if you later want to peer VPCs — plan IP space up front. /16 (65,536 IPs) is the max, /28 (16 IPs) the min; AWS reserves 5 IPs in every subnet (first 4 + last).</div>`},
+ {id:"subnets",title:"Subnets — Public & Private",level:"Beginner",color:"#10b981",vis:visSubnets,
+  body:`<p>A <b>subnet</b> is a slice of your VPC CIDR placed in <b>one AZ</b>. A subnet is <b>public</b> if its route table sends internet-bound traffic (0.0.0.0/0) to an Internet Gateway; otherwise it's <b>private</b>.</p>
+  <div class="kp"><span><b>Public subnet:</b> hosts things that must accept inbound internet traffic — load balancers, web servers, bastion hosts.</span></div>
+  <div class="kp"><span><b>Private subnet:</b> hosts databases, app servers, caches — no public IP, unreachable from the internet.</span></div>
+  <div class="kp"><span>Classic 3-tier layout: public subnets (ALB/bastion) in 2 AZs + private subnets (app) + isolated subnets (database).</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> "Public" isn't a checkbox on the subnet — it's purely the <b>route table + IGW</b>. An instance in a "public" subnet still needs a public IP (or Elastic IP) to be reachable.</div>`},
+ {id:"routes",title:"Route Tables",level:"Beginner",color:"#10b981",vis:visRouteTable,
+  body:`<p>The <b>route table</b> is the VPC's GPS: for every packet it decides the next hop based on <b>destination</b>, using longest-prefix-match.</p>
+  <div class="kp"><span>Every VPC has a <b>main route table</b>; subnets without an explicit association use it.</span></div>
+  <div class="kp"><span>The <code>local</code> route (your VPC CIDR) is always there and enables communication between all subnets in the VPC.</span></div>
+  <div class="kp"><span>Typical public route: <code>0.0.0.0/0 → igw-xxx</code>; typical private route: <code>0.0.0.0/0 → nat-xxx</code>.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotchas:</b> Routing is <b>destination-based only</b> — no policy routing. Routes can point to an IGW, NAT GW, VGW, TGW, peering connection or VPC endpoint — but pointing 0.0.0.0/0 at a peering connection sends ALL traffic next door.</div>`},
+ {id:"igw",title:"Internet Gateway (IGW)",level:"Beginner",color:"#10b981",vis:visIGW,
+  body:`<p>The <b>IGW</b> is the VPC's front door to the internet: a horizontally-scaled, redundant, AWS-managed component. It performs 1:1 NAT between an instance's <b>public IP</b> and its private IP.</p>
+  <div class="kp"><span>Attach <b>one IGW per VPC</b> (it's free) and add a route <code>0.0.0.0/0 → IGW</code> to make subnets public.</span></div>
+  <div class="kp"><span>Without an IGW, nothing in the VPC can talk to the internet, period.</span></div>
+  <div class="kp"><span>An instance with a public IP but <i>no IGW route</i> is unreachable — the route is what makes it work.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> "Public IP" isn't on the instance's network card — the instance only knows its private IP; the IGW does the translation. "What's my IP" tools see the public one.</div>`},
+ {id:"nat",title:"NAT Gateway",level:"Beginner→Intermediate",color:"#8b5cf6",vis:visNAT,
+  body:`<p>Private instances still need to <b>reach out</b> — OS updates, API calls, package downloads. A <b>NAT Gateway</b> lives in a <i>public</i> subnet, lets private instances initiate outbound connections, and blocks inbound initiation.</p>
+  <div class="kp"><span>Flow: private EC2 → route 0.0.0.0/0 → NAT GW (public subnet) → IGW → internet. Replies flow back automatically.</span></div>
+  <div class="kp"><span>AWS-managed, scales to 100 Gbps, billed per hour <b>and per GB processed</b>.</span></div>
+  <div class="kp"><span>Use one NAT GW per AZ for high availability — a NAT GW is single-AZ.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotchas:</b> NAT Gateway <b>cannot be pinged or connected to</b> — it only handles return traffic for outbound flows. Forgotten NAT gateways are a classic surprise-cost line item.</div>`},
+ {id:"sg",title:"Security Groups (stateful)",level:"Intermediate",color:"#8b5cf6",vis:visSG,
+  body:`<p>A <b>Security Group</b> acts as a firewall <i>at the instance (ENI) level</i>. You add allow rules by port, protocol and source — that's all: SGs are <b>allow-only</b> and <b>stateful</b>.</p>
+  <div class="kp"><span><b>Stateful:</b> if inbound port 443 is allowed, the response is automatically allowed back out — no mirror rule needed.</span></div>
+  <div class="kp"><span>Default SG: deny all inbound, allow all outbound (plus allow everything from instances in the same group).</span></div>
+  <div class="kp"><span>Rules can reference other SGs — "allow 5432 from sg-webservers" beats raw CIDRs.</span></div>
+  <div class="kp"><span>Applies to an ENI, changes apply immediately, all rules evaluated together (no ordering).</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> There is no explicit "DENY" — anything not allowed is implicitly denied. One open 0.0.0.0/0 rule on port 22 defeats all your other restrictions.</div>`},
+ {id:"nacl",title:"Network ACLs (stateless)",level:"Intermediate",color:"#8b5cf6",vis:visNACL,
+  body:`<p>A <b>NACL</b> is an optional firewall at the <i>subnet</i> border. Unlike SGs it's <b>stateless</b> and supports both <b>ALLOW and DENY</b> rules, evaluated in ascending rule-number order.</p>
+  <div class="kp"><span>Rule #100 evaluated before #200; first match wins; <code>*</code> (deny all) is the implicit last rule.</span></div>
+  <div class="kp"><span>Ephemeral ports: because it's stateless, allowed inbound connections need a return rule allowing 1024–65535 outbound.</span></div>
+  <div class="kp"><span>Every subnet has a NACL (default: allow all in/out). Use NACLs as a coarse subnet guard; SGs for day-to-day control.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> Debugging "why can't I connect" is twice as hard with NACLs — check both directions AND ephemeral ports. NACL rules use IP CIDRs, not SG references.</div>`},
+ {id:"peering",title:"VPC Peering",level:"Intermediate",color:"#8b5cf6",vis:visPeering,
+  body:`<p><b>VPC Peering</b> is a private 1-to-1 connection between two VPCs (same or different accounts, same or different regions) using AWS's network — no VPN, no hardware.</p>
+  <div class="kp"><span>Traffic stays on the AWS backbone: private, no public internet.</span></div>
+  <div class="kp"><span>Each side needs routes pointing at the peer, plus SG rules allowing the peer's CIDR.</span></div>
+  <div class="kp"><span>Neither VPC can be in the peering path for the other — traffic only flows between directly peered VPCs.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotchas:</b> <b>Non-transitive:</b> A↔B + B↔C does NOT give A↔C. Overlapping CIDRs cannot peer. n(n−1)/2 connections don't scale — that's what Transit Gateway is for.</div>`},
+ {id:"tgw",title:"Transit Gateway",level:"Advanced",color:"#ef4444",vis:visTGW,
+  body:`<p>When you have <b>many</b> VPCs, a <b>Transit Gateway (TGW)</b> becomes the hub of a hub-and-spoke network. Each VPC attaches once, and the TGW routes between any pair — and can also attach VPN connections and Direct Connect gateways.</p>
+  <div class="kp"><span>One TGW attachment per VPC replaces O(n²) peering connections.</span></div>
+  <div class="kp"><span>Full-mesh by default, or segment with TGW route tables per "route domain" (e.g. prod ↔ dev isolation).</span></div>
+  <div class="kp"><span>Cross-region TGW peering connects whole regions together.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotchas:</b> TGW ENIs need IPs in each attaching subnet — AWS reserves 5 IPs per subnet, so small /28 subnets can fail to attach. TGW charges per attachment/hour <b>plus per GB</b> processed.</div>`},
+ {id:"hybrid",title:"Hybrid — VPN & Direct Connect",level:"Advanced",color:"#ef4444",vis:visHybrid,
+  body:`<p>Real architectures keep a datacenter (or office) and extend it into AWS. Two main paths: <b>Site-to-Site VPN</b> (encrypted IPsec tunnels over the internet, terminating at a Virtual Private Gateway or TGW) and <b>AWS Direct Connect</b> (a dedicated private physical circuit into AWS).</p>
+  <div class="kp"><span>VPN: minutes to set up, cheap, but subject to internet latency and jitter.</span></div>
+  <div class="kp"><span>Direct Connect: consistent low latency, high bandwidth (1/10/100 Gbps), private — but takes weeks to provision via a partner/colocation facility.</span></div>
+  <div class="kp"><span>Route learning over <b>BGP</b>; route tables and priority decide which path traffic prefers.</span></div>
+  <div class="kp"><span>Common pattern: DX for primary traffic + VPN as encrypted failover backup.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> A VGW-attached VPN serves <b>one VPC</b>; use TGW attachments to serve many. DX gives you a private circuit — not encryption — so sensitive workloads often run IPsec ("VPN over DX") on top.</div>`},
+ {id:"dns",title:"DNS & Route 53",level:"Advanced",color:"#ef4444",vis:visDNS,
+  body:`<p>DNS glues the whole thing together. <b>Route 53</b> is AWS's managed, globally resilient DNS; inside the VPC, the built-in <b>Route 53 Resolver</b> (always the VPC's <code>.2</code> address, e.g. 10.0.0.2) resolves names for instances.</p>
+  <div class="kp"><span><b>Public hosted zones</b> answer for internet domain names; <b>private hosted zones</b> answer only inside your VPCs.</span></div>
+  <div class="kp"><span>Record types: A/AAAA (IPs), CNAME (alias of another name), <b>Alias</b> — Route-53-aware, points at AWS resources, free queries, follows target health.</span></div>
+  <div class="kp"><span>Routing policies: weighted, latency-based, geolocation, failover, and health-check-driven multi-region failover.</span></div>
+  <div class="kp"><span>Hybrid DNS (Resolver endpoints &amp; rules) lets on-prem and VPC resolve each other's private names.</span></div>
+  <div class="gotcha"><b>⚠️ Common gotcha:</b> Resolver endpoints live in <b>your</b> subnets and consume IP addresses — size subnets accordingly. DNS problems fail silently: apps "can't connect" when the name simply doesn't resolve.</div>`},
+];
+
+/* ---------------- App logic ---------------- */
+
+function loadDone(){
+  try { return JSON.parse(localStorage.getItem("awsNetDone") || "{}"); } catch(e){ return {}; }
+}
+let index = 0;
+const done = loadDone();
+
+function pct(){
+  const n = MODULES.filter(m=>done[m.id]).length;
+  return Math.round(n / MODULES.length * 100);
+}
+function renderNav(){
+  document.getElementById("nav").innerHTML =
+    `<div class="ntitle">Modules</div>` +
+    MODULES.map((m,i)=>`
+      <button class="nbtn ${i===index?"active":""} ${done[m.id]?"done":""}" onclick="go(${i})" title="${m.title}">
+        <span class="nnum">${done[m.id]?"✓":i+1}</span><span>${m.title}</span>
+      </button>`).join("");
+}
+function render(){
+  const m = MODULES[index];
+  renderNav();
+  document.getElementById("pfill").style.width = pct()+"%";
+  document.getElementById("ptxt").textContent = pct()+"% done";
+  const isDone = !!done[m.id];
+  document.getElementById("main").innerHTML = `
+    <div class="card"><div class="panel">
+      <div class="meta">
+        <div><span class="badge" style="background:${m.color}">${m.level}</span><span class="mtxt">Module ${index+1} of ${MODULES.length}</span></div>
+        <button class="donebtn ${isDone?"on":""}" onclick="toggleDone()">${isDone?"✓ Completed":"Mark complete"}</button>
+      </div>
+      <h2>${m.title}</h2>
+      <div class="visbox">${m.vis()}</div>
+      <div class="explain">${m.body}</div>
+      <div class="navrow">
+        <button class="navbtn back" onclick="go(${index-1})" ${index===0?"disabled":""}>← Previous</button>
+        <span class="step">Module ${index+1} of ${MODULES.length}</span>
+        <button class="navbtn next" onclick="nextMod()" ${index===MODULES.length-1?"disabled":""}>Next module →</button>
+      </div>
+      <div class="hint">Tip: use ← and → keys to navigate modules</div>
+    </div></div>`;
+}
+function go(i){ if(i>=0 && i<MODULES.length){ index=i; render(); window.scrollTo({top:0,behavior:"smooth"}); } }
+function nextMod(){ done[MODULES[index].id]=true; save(); go(index+1); }
+function toggleDone(){
+  const id = MODULES[index].id;
+  done[id] = !done[id];
+  save(); render();
+}
+function save(){ try { localStorage.setItem("awsNetDone", JSON.stringify(done)); } catch(e){} }
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="ArrowRight") go(index+1);
+  if(e.key==="ArrowLeft") go(index-1);
+});
+render();
+</script>
+</body>
+</html>
